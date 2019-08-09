@@ -1,6 +1,7 @@
 package com.example.guptagaurav;
 
 import android.location.Location;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -140,6 +141,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putBoolean("is_requesting_updates", mRequestingLocationUpdates);
+        outState.putParcelable("last_know_location", mCurrentLocation);
+        outState.putString("last_update_on", mLastUpdateTime);
+    }
+
+    /*
+     * @ Restoring values from saved instance state
+     */
     private void restoreValuesFromBundle(Bundle savedInstanceState) {
+        if(savedInstanceState != null) {
+            if (savedInstanceState.containsKey("is_requesting_updates")) {
+               mRequestingLocationUpdates = savedInstanceState.getBoolean("is_requesting_updates");
+            }
+
+            if (savedInstanceState.containsKey("last_know_location")) {
+               mCurrentLocation = savedInstanceState.getParcelable("last_know_location");
+            }
+
+            if (savedInstanceState.containsKey("last_update_on")) {
+                mLastUpdateTime = savedInstanceState.getString("last_update_on");
+            }
+        }
+
+        updateLocationUI();
     }
 }
