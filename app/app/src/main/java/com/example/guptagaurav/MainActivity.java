@@ -126,6 +126,18 @@ public class MainActivity extends AppCompatActivity {
             // location last update time
             txtUpdatedOn.setText("Last update on: " + mLastUpdateTime);
         }
+        
+        toggleButton();
+    }
+
+    private void toggleButton() {
+        if(mRequestingLocationUpdates) {
+            btnStartUpdates.setEnabled(false);
+            btnStopUpdates.setEnabled(true);
+        } else {
+            btnStartUpdates.setEnabled(true);
+            btnStopUpdates.setEnabled(false);
+        }
     }
 
     private void restoreValuesFromBundle(Bundle savedInstanceState) {
