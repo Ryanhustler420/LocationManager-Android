@@ -2,6 +2,7 @@ package com.example.guptagaurav;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.LocationAvailability;
@@ -264,13 +266,24 @@ public class MainActivity extends AppCompatActivity {
                     int statusCode = ((ApiException) e).getStatusCode();
                     switch (statusCode) {
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-
+                            Log.i(TAG,"Location settings are not satisfied. Attempting to upgrade " + "location setting");
+                            ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                                try {
+                                    resolvableApiException.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                                } catch (IntentSender.SendIntentException e1) {
+                                    e1.printStackTrace();
+                                    Log.i(TAG, "Pending Intent Unable to execute request.");
+                                }
                             break;
 
                         case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            
+                                String errorMessage = "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings.";
+                                Log.e(TAG, errorMessage);
+
+                                Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                             break;
                     }
+                    updateLocationUI();
                 }
             });
     }
