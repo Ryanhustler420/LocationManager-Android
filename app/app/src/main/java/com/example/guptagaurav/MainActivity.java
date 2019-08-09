@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Looper;
 import android.os.PersistableBundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -208,19 +210,29 @@ public class MainActivity extends AppCompatActivity {
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
-
+                        mRequestingLocationUpdates = true;
+                        startLocationUpdates();
                     }
 
                     @Override
                     public void onPermissionDenied(PermissionDeniedResponse response) {
+                        if (response.isPermanentlyDenied()) {
+                            // open device setting when the permission is denied
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
 
+                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
                     }
 
                     @Override
                     public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-
+                        token.continuePermissionRequest();
                     }
-                });
+                }).check();
     }
 
     @OnClick(R.id.btn_stop_location_updates)
@@ -230,7 +242,12 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.btn_get_last_location)
     public void showLastKnowLocation() {
-
+        if (mCurrentLocation != null) {
+            Toast.makeText(getApplicationContext(), "Lat: " + mCurrentLocation.getLatitude() + ", Lng: " + mCurrentLocation.getLongitude(), Toast.LENGTH_LONG)
+                    .show();
+        } else {
+           Toast.makeText(getApplicationContext(), "Last Know location is not available!", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -293,6 +310,8 @@ public class MainActivity extends AppCompatActivity {
                             Log.i(TAG,"Location settings are not satisfied. Attempting to upgrade " + "location setting");
                             ResolvableApiException resolvableApiException = (ResolvableApiException) e;
                                 try {
+                                    // Show the dialog by calling startResolutionForResult(), and check the
+                                    // result in onActivityResult().
                                     resolvableApiException.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
                                 } catch (IntentSender.SendIntentException e1) {
                                     e1.printStackTrace();
