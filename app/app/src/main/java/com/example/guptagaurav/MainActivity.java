@@ -8,13 +8,18 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -46,6 +51,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -95,6 +101,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtLocationResult.setOnClickListener(this);
         btnStartUpdates.setOnClickListener(this);
         btnStopUpdates.setOnClickListener(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            //toolbar.setTitleTextColor(0xFFFFFFFF);
+            Objects.requireNonNull(getSupportActionBar()).setTitle((Html.fromHtml("<font color=\"#000\">" + getString(R.string.app_name) + "</font>")));
+        }
 
         // initialize the necessary libraries
         init();
