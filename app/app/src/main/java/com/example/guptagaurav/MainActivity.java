@@ -9,14 +9,14 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Looper;
-import android.os.PersistableBundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,24 +47,13 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.text.DateFormat;
 import java.util.Date;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.location_result)
     TextView txtLocationResult;
-
-    @BindView(R.id.updated_on)
     TextView txtUpdatedOn;
-
-    @BindView(R.id.btn_start_location_updates)
     Button btnStartUpdates;
-
-    @BindView(R.id.btn_stop_location_updates)
     Button btnStopUpdates;
 
     // location last update time
@@ -97,8 +86,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // binding current view with this class
-        ButterKnife.bind(this);
+        txtLocationResult = findViewById(R.id.location_result);
+        txtUpdatedOn = findViewById(R.id.updated_on);
+        btnStartUpdates = findViewById(R.id.btn_start_location_updates);
+        btnStopUpdates = findViewById(R.id.btn_stop_location_updates);
+
+        txtUpdatedOn.setOnClickListener(this);
+        txtLocationResult.setOnClickListener(this);
+        btnStartUpdates.setOnClickListener(this);
+        btnStopUpdates.setOnClickListener(this);
 
         // initialize the necessary libraries
         init();
@@ -141,6 +137,21 @@ public class MainActivity extends AppCompatActivity {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
         mLocationSettingsRequest = builder.build();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_start_location_updates:
+                    startLocationButtonClick();
+                break;
+            case R.id.btn_stop_location_updates:
+                    stopLocationButtonClick();
+                break;
+            case R.id.btn_get_last_location:
+                    showLastKnowLocation();
+                break;
+        }
     }
 
     /*
@@ -213,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
     // Map Testing
     // Prototype Design
 
-    @OnClick(R.id.btn_start_location_updates)
     public void startLocationButtonClick() {
         // Requesting ACCESS_FINE_LOCATION using Dexter library
         Dexter.withActivity(this)
@@ -240,7 +250,6 @@ public class MainActivity extends AppCompatActivity {
                 }).check();
     }
 
-    @OnClick(R.id.btn_stop_location_updates)
     public void stopLocationButtonClick() {
         mRequestingLocationUpdates = false;
         stopLocationUpdates();
@@ -259,7 +268,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    @OnClick(R.id.btn_get_last_location)
     public void showLastKnowLocation() {
         if (mCurrentLocation != null) {
             Toast.makeText(getApplicationContext(), "Lat: " + mCurrentLocation.getLatitude() + ", Lng: " + mCurrentLocation.getLongitude(), Toast.LENGTH_LONG)
