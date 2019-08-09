@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
 
                 // we'll update the UI here
+
+                updateLocationUI();
             }
 
             @Override
@@ -98,6 +100,32 @@ public class MainActivity extends AppCompatActivity {
                 super.onLocationAvailability(locationAvailability);
             }
         };
+
+        mRequestingLocationUpdates = false;
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
+    }
+
+    private void updateLocationUI() {
+        if(mCurrentLocation != null) {
+            txtLocationResult.setText(
+                    "Lat: " + mCurrentLocation.getLatitude() + ", " + "Lng: " + mCurrentLocation.getLongitude()
+            );
+
+            // giving a blink animation an TextView
+            txtLocationResult.setAlpha(0);
+            txtLocationResult.animate().alpha(1).setDuration(300);
+
+            // location last update time
+            txtUpdatedOn.setText("Last update on: " + mLastUpdateTime);
+        }
     }
 
     private void restoreValuesFromBundle(Bundle savedInstanceState) {
