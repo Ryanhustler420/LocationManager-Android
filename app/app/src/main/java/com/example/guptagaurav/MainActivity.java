@@ -31,8 +31,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -218,13 +220,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onPermissionDenied(PermissionDeniedResponse response) {
                         if (response.isPermanentlyDenied()) {
                             // open device setting when the permission is denied
-                            Intent intent = new Intent();
-                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-
-                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                            intent.setData(uri);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            openSettings();
                         }
                     }
 
@@ -236,8 +232,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.btn_stop_location_updates)
-    public void stopLocationUpdates() {
+    public void stopLocationButtonClick() {
+        mRequestingLocationUpdates = false;
+        stopLocationUpdates();
+    }
 
+    private void stopLocationUpdates() {
+        // Removing location updates
+        mFusedLocationClient
+                .removeLocationUpdates(mLocationCallback)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(getApplicationContext(), "Location updates stopped!", Toast.LENGTH_LONG).show();
+                        toggleButton();
+                    }
+                });
     }
 
     @OnClick(R.id.btn_get_last_location)
@@ -258,11 +268,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Resume location updates depending on button state and
+        // allowed permission
+        if(mRequestingLocationUpdates && checkPermission()) {
+            startLocationUpdates();
+        }
+
+        updateLocationUI();
+    }
+
+    private boolean checkPermission() {
+        int permissionState = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
+        if(mRequestingLocationUpdates) {
+            // pausing location updates
+            stopLocationUpdates();
+        }
     }
 
     /*
@@ -329,5 +357,15 @@ public class MainActivity extends AppCompatActivity {
                     updateLocationUI();
                 }
             });
+    }
+
+    public void openSettings() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+
+        Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+        intent.setData(uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
