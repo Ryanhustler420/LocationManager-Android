@@ -1,6 +1,8 @@
 package com.example.guptagaurav;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -141,10 +143,17 @@ public class MainActivity extends AppCompatActivity {
         mLocationSettingsRequest = builder.build();
     }
 
+    /*
+    * Update the UI displaying the location data and toggling the buttons based on
+    * state.
+    * */
+
+    @SuppressLint("SetTextI18n")
     private void updateLocationUI() {
         if (mCurrentLocation != null) {
             txtLocationResult.setText(
-                    "Lat: " + mCurrentLocation.getLatitude() + ", " + "Lng: " + mCurrentLocation.getLongitude()
+                    "Lat: " + mCurrentLocation.getLatitude() + ", " + "Lng: "
+                            + mCurrentLocation.getLongitude()
             );
 
             // giving a blink animation an TextView
@@ -169,8 +178,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putBoolean("is_requesting_updates", mRequestingLocationUpdates);
         outState.putParcelable("last_know_location", mCurrentLocation);
         outState.putString("last_update_on", mLastUpdateTime);
@@ -262,7 +271,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            // Check for the integer request code originally supplied to StartResolutionForRequest().
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        Log.e(TAG, "User agreed to make required location settings changes.");
+                        // Noting to do. startLocationUpdate() gets called in OnResume again.
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Log.e(TAG, "User choose not to make required location settings changes.");
+                        mRequestingLocationUpdates = false;
+                        break;
+                }
+                break;
+        }
     }
 
     @Override
