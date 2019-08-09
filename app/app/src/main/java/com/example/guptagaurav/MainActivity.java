@@ -1,22 +1,34 @@
 package com.example.guptagaurav;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Looper;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -70,16 +82,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         // binding current view with this class
         ButterKnife.bind(this);
-        
+
         // initialize the necessary libraries
         init();
 
         // restore the values from saved instance state
         restoreValuesFromBundle(savedInstanceState);
-        
+
     }
 
     private void init() {
@@ -118,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateLocationUI() {
-        if(mCurrentLocation != null) {
+        if (mCurrentLocation != null) {
             txtLocationResult.setText(
                     "Lat: " + mCurrentLocation.getLatitude() + ", " + "Lng: " + mCurrentLocation.getLongitude()
             );
@@ -130,12 +142,12 @@ public class MainActivity extends AppCompatActivity {
             // location last update time
             txtUpdatedOn.setText("Last update on: " + mLastUpdateTime);
         }
-        
+
         toggleButton();
     }
 
     private void toggleButton() {
-        if(mRequestingLocationUpdates) {
+        if (mRequestingLocationUpdates) {
             btnStartUpdates.setEnabled(false);
             btnStopUpdates.setEnabled(true);
         } else {
@@ -156,13 +168,13 @@ public class MainActivity extends AppCompatActivity {
      * @ Restoring values from saved instance state
      */
     private void restoreValuesFromBundle(Bundle savedInstanceState) {
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("is_requesting_updates")) {
-               mRequestingLocationUpdates = savedInstanceState.getBoolean("is_requesting_updates");
+                mRequestingLocationUpdates = savedInstanceState.getBoolean("is_requesting_updates");
             }
 
             if (savedInstanceState.containsKey("last_know_location")) {
-               mCurrentLocation = savedInstanceState.getParcelable("last_know_location");
+                mCurrentLocation = savedInstanceState.getParcelable("last_know_location");
             }
 
             if (savedInstanceState.containsKey("last_update_on")) {
@@ -208,5 +220,58 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    /*
+     * Starting location updates
+     * Check whether location setting are satisfies and then
+     * location update will be requested
+     */
+
+    private void startLocationUpdates() {
+        mSettingsClient
+                .checkLocationSettings(mLocationSettingsRequest)
+
+                .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        Log.i(TAG, "ALL location settings are satisfied. enjoy");
+
+                        Toast.makeText(getApplicationContext(), "Start location updates!", Toast.LENGTH_SHORT).show();
+
+                        //noinspection MissingPermission
+                        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            // TODO: Consider calling
+                            //    ActivityCompat#requestPermissions
+                            // here to request the missing permissions, and then overriding
+                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                            //                                          int[] grantResults)
+                            // to handle the case where the user grants the permission. See the documentation
+                            // for ActivityCompat#requestPermissions for more details.
+                            return;
+                        }
+                        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+
+                        // again updating the UI text
+                        updateLocationUI();
+                }
+            })
+
+            .addOnFailureListener(this, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    int statusCode = ((ApiException) e).getStatusCode();
+                    switch (statusCode) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+                            break;
+
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            
+                            break;
+                    }
+                }
+            });
     }
 }
