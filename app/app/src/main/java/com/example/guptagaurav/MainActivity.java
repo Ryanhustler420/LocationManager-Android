@@ -1,7 +1,9 @@
 package com.example.guptagaurav;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -168,5 +171,42 @@ public class MainActivity extends AppCompatActivity {
         }
 
         updateLocationUI();
+    }
+
+    // TODO: thing to do later on
+    // UI
+    // Story Line
+    // Fire base
+    // Map Testing
+    // Prototype Design
+
+    @OnClick(R.id.btn_start_location_updates)
+    public void startLocationButtonClick() {
+
+    }
+
+    @OnClick(R.id.btn_stop_location_updates)
+    public void stopLocationUpdates() {
+
+    }
+
+    @OnClick(R.id.btn_get_last_location)
+    public void showLastKnowLocation() {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }
