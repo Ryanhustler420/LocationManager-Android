@@ -13,10 +13,8 @@ import android.os.Looper;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import android.os.Bundle;
 import android.text.Html;
@@ -59,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     TextView txtLocationResult;
     TextView txtUpdatedOn;
+    TextView btnLastLocation;
     Button btnStartUpdates;
     Button btnStopUpdates;
 
@@ -96,9 +95,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtUpdatedOn = findViewById(R.id.updated_on);
         btnStartUpdates = findViewById(R.id.btn_start_location_updates);
         btnStopUpdates = findViewById(R.id.btn_stop_location_updates);
+        btnLastLocation = findViewById(R.id.btn_get_last_location);
 
-        txtUpdatedOn.setOnClickListener(this);
-        txtLocationResult.setOnClickListener(this);
+        btnLastLocation.setOnClickListener(this);
         btnStartUpdates.setOnClickListener(this);
         btnStopUpdates.setOnClickListener(this);
 
