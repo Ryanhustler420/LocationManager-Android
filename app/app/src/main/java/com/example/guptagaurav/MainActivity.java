@@ -335,6 +335,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if(mRequestingLocationUpdates) {
+            stopLocationUpdates();
+        }
+    }
+
     /*
      * Starting location updates
      * Check whether location setting are satisfies and then
