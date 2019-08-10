@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             //toolbar.setTitleTextColor(0xFFFFFFFF);
             Objects.requireNonNull(getSupportActionBar()).setTitle((Html.fromHtml("<font color=\"#000\">" + getString(R.string.app_name) + "</font>")));
+            getSupportActionBar().setElevation(0);
         }
 
         // initialize the necessary libraries
